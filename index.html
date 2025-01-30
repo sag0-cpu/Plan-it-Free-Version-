@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .hidden { display: none; }
+        .project-list { margin-top: 20px; }
+        .project-item { display: flex; justify-content: space-between; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <button id="newProjectBtn">Create New Project</button>
+    
+    <div id="projectModal" class="hidden">
+        <input type="text" id="projectName" placeholder="Project Name">
+        <button id="saveProject">Save</button>
+    </div>
+    
+    <div class="project-list" id="projectList"></div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const newProjectBtn = document.getElementById("newProjectBtn");
+            const projectModal = document.getElementById("projectModal");
+            const saveProjectBtn = document.getElementById("saveProject");
+            const projectNameInput = document.getElementById("projectName");
+            const projectList = document.getElementById("projectList");
+            
+            newProjectBtn.addEventListener("click", () => {
+                projectModal.classList.remove("hidden");
+            });
+            
+            saveProjectBtn.addEventListener("click", () => {
+                const name = projectNameInput.value.trim();
+                if (name) {
+                    const projectId = Date.now().toString(); // Unique ID
+                    const project = { id: projectId, name };
+                    
+                    let projects = JSON.parse(localStorage.getItem("projects")) || [];
+                    projects.push(project);
+                    localStorage.setItem("projects", JSON.stringify(projects));
+                    
+                    projectNameInput.value = "";
+                    projectModal.classList.add("hidden");
+                    renderProjects();
+                }
+            });
+            
+            function renderProjects() {
+                projectList.innerHTML = "";
+                const projects = JSON.parse(localStorage.getItem("projects")) || [];
+                
+                projects.forEach(project => {
+                    const div = document.createElement("div");
+                    div.classList.add("project-item");
+                    div.innerHTML = `
+                        <span>${project.name}</span>
+                        <button onclick="openProject('${project.id}')">Open</button>
+                        <button onclick="deleteProject('${project.id}')">Delete</button>
+                    `;
+                    projectList.appendChild(div);
+                });
+            }
+            
+            window.openProject = (id) => {
+                window.location.href = `checklist.html?projectId=${id}`;
+            };
+            
+            window.deleteProject = (id) => {
+                let projects = JSON.parse(localStorage.getItem("projects")) || [];
+                projects = projects.filter(project => project.id !== id);
+                localStorage.setItem("projects", JSON.stringify(projects));
+                renderProjects();
+            };
+            
+            renderProjects();
+        });
+    </script>
+</body>
+</html>
