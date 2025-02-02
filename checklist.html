@@ -1,130 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .hidden { display: none; }
-        .task-section { margin-top: 20px; }
-        .task-item { display: flex; justify-content: space-between; margin: 5px 0; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+      /* Style for the checklist container */
+      .checklist-container {
+          text-align: center;
+          margin-top: 50px;
+      }
+
+      /* Style for each checklist item */
+      .checklist-item {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 15px;
+      }
+
+      /* Space between the checkbox and label */
+      .checklist-item label {
+          margin: 0 10px;
+      }
+
+      /* Style for the buttons next to checkboxes */
+      .checklist-item button {
+          margin-left: 10px;
+      }
+  </style>
 </head>
 <body>
-    <h1 id="projectTitle">Checklist</h1>
-    <button onclick="goBack()">Back to Dashboard</button>
+  <!-- Header with the project title -->
+  <h1 class="plan-header">Checklist</h1>
 
-    <!-- Research Section -->
-    <div class="task-section">
-        <div class="section-header">
-            <h2>Research</h2>
-            <button onclick="goToPage('research')">Research Page</button>
-        </div>
-        <input type="text" id="researchInput" placeholder="New Research Task">
-        <button onclick="addTask('research')">Add Task</button>
-        <div id="researchList"></div>
-    </div>
+  <div class="navigation-buttons">
+      <button onclick="goBack()" class="button">Go to Dashboard</button>
+  </div>
 
-    <!-- Plan Section -->
-    <div class="task-section">
-        <div class="section-header">
-            <h2>Plan</h2>
-            <button onclick="goToPage('plan')">Plan Page</button>
-        </div>
-        <input type="text" id="planInput" placeholder="New Plan Task">
-        <button onclick="addTask('plan')">Add Task</button>
-        <div id="planList"></div>
-    </div>
+  <!-- Checklist Section -->
+  <div class="checklist-container">
+      <!-- Research Checklist Item -->
+      <div class="checklist-item">
+          <input type="checkbox" id="research">
+          <label for="research">Research</label>
+          <button id="research-btn">Research Page</button>
+      </div>
 
-    <!-- Write Section -->
-    <div class="task-section">
-        <div class="section-header">
-            <h2>Write!</h2>
-            <button onclick="goToPage('writing-tools')">Writing Tools</button>
-        </div>
-        <input type="text" id="writeInput" placeholder="New Writing Task">
-        <button onclick="addTask('write')">Add Task</button>
-        <div id="writeList"></div>
-    </div>
+      <!-- Plan Checklist Item -->
+      <div class="checklist-item">
+          <input type="checkbox" id="plan">
+          <label for="plan">Plan</label>
+          <button id="plan-btn">Plan Page</button>
+      </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const projectId = urlParams.get("projectId");
+      <!-- Write Checklist Item -->
+      <div class="checklist-item">
+          <input type="checkbox" id="write">
+          <label for="write">Write!</label>
+          <button id="write-btn">Writing Tools</button>
+      </div>
+  </div>
 
-            if (!projectId) {
-                alert("Invalid project. Returning to dashboard.");
-                window.location.href = "index.html"; // Redirect if no ID
-                return;
-            }
+  <script>
+      document.addEventListener("DOMContentLoaded", () => {
+          // Get the project ID from the URL parameters
+          const params = new URLSearchParams(window.location.search);
+          const projectId = params.get("projectId");
 
-            const projectTitle = document.getElementById("projectTitle");
+          if (!projectId) {
+              alert("Invalid project. Returning to dashboard.");
+              window.location.href = "index.html"; // Redirect if no ID
+              return;
+          }
 
-            // Retrieve project name
-            const projects = JSON.parse(localStorage.getItem("projects")) || [];
-            const project = projects.find(p => p.id === projectId);
-            if (project) {
-                projectTitle.textContent = `Checklist: ${project.name}`;
-            }
+          // Retrieve the project name from localStorage
+          const projects = JSON.parse(localStorage.getItem("projects")) || [];
+          const project = projects.find(p => p.id === projectId);
+          if (project) {
+              document.querySelector(".plan-header").textContent = `Checklist: ${project.name}`;
+          }
 
-            function loadTasks(category) {
-                const taskList = document.getElementById(`${category}List`);
-                taskList.innerHTML = "";
-                const tasks = JSON.parse(localStorage.getItem(`${category}-${projectId}`)) || [];
+          // Set button links with project ID
+          document.getElementById("research-btn").onclick = () => {
+              window.location.href = `research.html?projectId=${projectId}`;
+          };
+          document.getElementById("plan-btn").onclick = () => {
+              window.location.href = `plan.html?projectId=${projectId}`;
+          };
+          document.getElementById("write-btn").onclick = () => {
+              window.location.href = `writing-tools.html?projectId=${projectId}`;
+          };
+      });
 
-                tasks.forEach((task, index) => {
-                    const div = document.createElement("div");
-                    div.classList.add("task-item");
-                    div.innerHTML = `
-                        <input type="checkbox" ${task.completed ? "checked" : ""} onclick="toggleTask('${category}', ${index})">
-                        <span>${task.text}</span>
-                        <button onclick="deleteTask('${category}', ${index})">Delete</button>
-                    `;
-                    taskList.appendChild(div);
-                });
-            }
-
-            window.addTask = (category) => {
-                const input = document.getElementById(`${category}Input`);
-                const text = input.value.trim();
-                if (text) {
-                    let tasks = JSON.parse(localStorage.getItem(`${category}-${projectId}`)) || [];
-                    tasks.push({ text, completed: false });
-                    localStorage.setItem(`${category}-${projectId}`, JSON.stringify(tasks));
-                    input.value = "";
-                    loadTasks(category);
-                }
-            };
-
-            window.toggleTask = (category, index) => {
-                let tasks = JSON.parse(localStorage.getItem(`${category}-${projectId}`)) || [];
-                tasks[index].completed = !tasks[index].completed;
-                localStorage.setItem(`${category}-${projectId}`, JSON.stringify(tasks));
-                loadTasks(category);
-            };
-
-            window.deleteTask = (category, index) => {
-                let tasks = JSON.parse(localStorage.getItem(`${category}-${projectId}`)) || [];
-                tasks.splice(index, 1);
-                localStorage.setItem(`${category}-${projectId}`, JSON.stringify(tasks));
-                loadTasks(category);
-            };
-
-            window.goBack = () => {
-                window.location.href = "index.html";
-            };
-
-            window.goToPage = (page) => {
-                window.location.href = `${page}.html?projectId=${projectId}`;
-            };
-
-            // Load tasks for each section
-            loadTasks("research");
-            loadTasks("plan");
-            loadTasks("write");
-        });
-    </script>
+      function goBack() {
+          window.location.href = "index.html";
+      }
+  </script>
+  
 </body>
 </html>
