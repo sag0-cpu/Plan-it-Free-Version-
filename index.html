@@ -14,7 +14,8 @@
 <body>
     <h1>Dashboard</h1>
     <button id="newProjectBtn">Create New Project</button>
-    
+    <button id="clearStorageBtn">Clear All Projects</button> <!-- New Button -->
+
     <div id="projectModal" class="hidden">
         <input type="text" id="projectName" placeholder="Project Name">
         <button id="saveProject">Save</button>
@@ -25,6 +26,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const newProjectBtn = document.getElementById("newProjectBtn");
+            const clearStorageBtn = document.getElementById("clearStorageBtn"); // Get the button
             const projectModal = document.getElementById("projectModal");
             const saveProjectBtn = document.getElementById("saveProject");
             const projectNameInput = document.getElementById("projectName");
@@ -33,7 +35,7 @@
             newProjectBtn.addEventListener("click", () => {
                 projectModal.classList.remove("hidden");
             });
-            
+
             saveProjectBtn.addEventListener("click", () => {
                 const name = projectNameInput.value.trim();
                 if (name) {
@@ -49,7 +51,7 @@
                     renderProjects();
                 }
             });
-            
+
             function renderProjects() {
                 projectList.innerHTML = "";
                 const projects = JSON.parse(localStorage.getItem("projects")) || [];
@@ -65,18 +67,26 @@
                     projectList.appendChild(div);
                 });
             }
-            
+
             window.openProject = (id) => {
                 window.location.href = `checklist.html?projectId=${id}`;
             };
-            
+
             window.deleteProject = (id) => {
                 let projects = JSON.parse(localStorage.getItem("projects")) || [];
                 projects = projects.filter(project => project.id !== id);
                 localStorage.setItem("projects", JSON.stringify(projects));
                 renderProjects();
             };
-            
+
+            // Function to clear all local storage
+            clearStorageBtn.addEventListener("click", () => {
+                if (confirm("Are you sure you want to delete all projects? This cannot be undone.")) {
+                    localStorage.removeItem("projects");
+                    renderProjects();
+                }
+            });
+
             renderProjects();
         });
     </script>
