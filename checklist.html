@@ -1,1 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .hidden { display: none; }
+        .task-list { margin-top: 20px; }
+        .task-item { display: flex; justify-content: space-between; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1 id="projectTitle">Checklist</h1>
+    <button onclick="goBack()">Back to Dashboard</button>
 
+    <div>
+        <input type="text" id="taskInput" placeholder="New Task">
+        <button id="addTaskBtn">Add Task</button>
+    </div>
+
+    <div class="task-list" id="taskList"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get("projectId");
+
+            if (!projectId) {
+                alert("Invalid project. Returning to dashboard.");
+                window.location.href = "index.html"; // Redirect if no ID
+                return;
+            }
+
+            const taskInput = document.getElementById("taskInput");
+            const addTaskBtn = document.getElementById("addTaskBtn");
+            const taskList = document.getElementById("taskList");
+            const projectTitle = document.getElementById("projectTitle");
+
+            // Retrieve project name from localStorage
+            const projects = JSON.parse(localStorage.getItem("projects")) || [];
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                projectTitle.textContent = `Checklist: ${project.name}`;
+            }
+
+            function loadTasks() {
+                taskList.innerHTML = "";
+                const tasks = JSON.parse(localStorage.getItem(`checklist-${projectId}`)) || [];
+
+                tasks.forEach((task, index) => {
+                    const div = document.createElement("div");
+                    div.classList.add("task-item");
+                    div.innerHTML = `
+                        <input type="checkbox" ${task.completed ? "checked" : ""} onclick="toggleTask(${index})">
+                        <span>${task.text}</span>
+                        <button onclick="deleteTask(${index})">Delete</button>
+                    `;
+                    taskList.appendChild(div);
+                });
+            }
+
+            addTaskBtn.addEventListener("click", () => {
+                const text = taskInput.value.trim();
+                if (text) {
+                    let tasks = JSON.parse(localStorage.getItem(`checklist-${projectId}`)) || [];
+                    tasks.push({ text, completed: false });
+                    localStorage.setItem(`checklist-${projectId}`, JSON.stringify(tasks));
+                    taskInput.value = "";
+                    loadTasks();
+                }
+            });
+
+            window.toggleTask = (index) => {
+                let tasks = JSON.parse(localStorage.getItem(`checklist-${projectId}`)) || [];
+                tasks[index].completed = !tasks[index].completed;
+                localStorage.setItem(`checklist-${projectId}`, JSON.stringify(tasks));
+                loadTasks();
+            };
+
+            window.deleteTask = (index) => {
+                let tasks = JSON.parse(localStorage.getItem(`checklist-${projectId}`)) || [];
+                tasks.splice(index, 1);
+                localStorage.setItem(`checklist-${projectId}`, JSON.stringify(tasks));
+                loadTasks();
+            };
+
+            window.goBack = () => {
+                window.location.href = "index.html";
+            };
+
+            loadTasks();
+        });
+    </script>
+</body>
+</html>
