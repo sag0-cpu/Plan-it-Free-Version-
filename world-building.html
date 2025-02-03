@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World-Building</title>
+  <style>
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    .example {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .saved-text {
+      white-space: pre-wrap;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <h1>World-Building Page</h1>
+
+  <!-- Section: Where does your story take place? -->
+  <div class="example">
+    <h2>Where Does Your Story Take Place?</h2>
+    <p><strong>Example:</strong> The story is set on a distant planet covered in endless oceans, with floating cities built on the backs of giant sea creatures. The sky is perpetually stormy, and lightning is harvested as a source of energy.</p>
+    <textarea id="storyPlace" placeholder="Describe where your story takes place..."></textarea>
+    <button class="button" onclick="saveProgress('storyPlace')">Save</button>
+    <div id="savedStoryPlace" class="saved-text" style="display: none;">
+      <h3>Your Saved Place:</h3>
+      <p id="displayStoryPlace"></p>
+    </div>
+  </div>
+
+  <!-- Section: What are the rules? -->
+  <div class="example">
+    <h2>What Are the Rules?</h2>
+    <p><strong>Example:</strong> In this world, no one is allowed to touch the ground. If they do, they are exiled to the storm-ridden wastelands where survival is almost impossible. The floating cities enforce this rule through an intricate surveillance system.</p>
+    <textarea id="storyRules" placeholder="Define the rules of your world..."></textarea>
+    <button class="button" onclick="saveProgress('storyRules')">Save</button>
+    <div id="savedStoryRules" class="saved-text" style="display: none;">
+      <h3>Your Saved Rules:</h3>
+      <p id="displayStoryRules"></p>
+    </div>
+  </div>
+
+  <!-- Section: What happens if someone breaks those rules? -->
+  <div class="example">
+    <h2>What Happens if Someone Breaks Those Rules?</h2>
+    <p><strong>Example:</strong> Those who break the rules are marked with glowing tattoos that reveal their crime to everyone. They are then sent to a high-security prison, which orbits the planet in a decaying satellite.</p>
+    <textarea id="ruleConsequences" placeholder="Describe the consequences of breaking the rules..."></textarea>
+    <button class="button" onclick="saveProgress('ruleConsequences')">Save</button>
+    <div id="savedRuleConsequences" class="saved-text" style="display: none;">
+      <h3>Your Saved Consequences:</h3>
+      <p id="displayRuleConsequences"></p>
+    </div>
+  </div>
+
+  <!-- Button to navigate back -->
+  <a href="research.html" class="button">Go Back to Research</a>
+
+  <script>
+    // Save user input to localStorage with unique ID for each entry
+    function saveProgress(inputId) {
+      const userInput = document.getElementById(inputId).value.trim();
+
+      if (userInput === "") {
+        alert("Please write something before saving.");
+      } else {
+        const userId = "user123"; // Replace with dynamic user identification if needed
+        const storageKey = `${userId}_${inputId}`; // Unique storage key per user
+        localStorage.setItem(storageKey, userInput);
+        displaySavedProgress(inputId, storageKey, userInput);
+        alert("Progress saved successfully!");
+      }
+    }
+
+    // Display saved progress on page load
+    window.onload = function () {
+      const userId = "user123"; // Replace with dynamic user identification if needed
+      const sections = ["storyPlace", "storyRules", "ruleConsequences"];
+
+      sections.forEach(inputId => {
+        const storageKey = `${userId}_${inputId}`;
+        const savedProgress = localStorage.getItem(storageKey);
+        if (savedProgress) {
+          displaySavedProgress(inputId, storageKey, savedProgress);
+        }
+      });
+    };
+
+    // Function to display saved progress
+    function displaySavedProgress(inputId, storageKey, progress) {
+      const savedProgressDiv = document.getElementById(`saved${inputId.charAt(0).toUpperCase() + inputId.slice(1)}`);
+      const displayText = savedProgressDiv.querySelector("p");
+
+      displayText.textContent = progress;
+      savedProgressDiv.style.display = "block";
+    }
+  </script>
+</body>
+</html>
