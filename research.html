@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Page</title>
+  <style>
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .checklist input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .checklist label {
+      flex: 1;
+    }
+
+    .saved-text {
+      white-space: pre-wrap;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="research-header">Research Page</h1>
+  <p>Use this checklist to track your research progress for your project.</p>
+
+  <!-- Checklist -->
+  <ul class="checklist">
+    <li>
+      <input type="checkbox" id="worldBuilding">
+      <label for="worldBuilding">World Building</label>
+      <a id="worldBuildingLink" class="button">Go to World Building</a>
+    </li>
+    <li>
+      <input type="checkbox" id="characterDevelopment">
+      <label for="characterDevelopment">Character Development</label>
+      <a id="characterDevelopmentLink" class="button">Go to Character Development</a>
+    </li>
+  </ul>
+
+  <div class="navigation-buttons">
+    <button id="planPageBtn" class="button">Go to Plan Page</button>
+    <button onclick="location.href='index.html'" class="button">Go to Dashboard</button>
+  </div>
+
+  <!-- Save button and display for progress -->
+  <button class="button" onclick="saveProgress()">Save Progress</button>
+
+  <div id="savedProgress" class="saved-text" style="display: none;">
+    <h3>Your Saved Progress:</h3>
+    <p id="displayProgress"></p>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Get the project ID from the URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const projectId = params.get("projectId");
+
+        if (!projectId) {
+            alert("Invalid project. Returning to dashboard.");
+            window.location.href = "index.html"; // Redirect if no ID
+            return;
+        }
+
+        // Retrieve the project name from localStorage
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+            document.querySelector(".research-header").textContent = `Research: ${project.name}`;
+        }
+
+        // Update links to include project ID
+        document.getElementById("worldBuildingLink").href = `world-building.html?projectId=${projectId}`;
+        document.getElementById("characterDevelopmentLink").href = `character-development.html?projectId=${projectId}`;
+        document.getElementById("planPageBtn").onclick = () => {
+            window.location.href = `plan.html?projectId=${projectId}`;
+        };
+
+        // Load and display saved progress for this project
+        const savedProgress = JSON.parse(localStorage.getItem(`researchProgress_${projectId}`));
+        if (savedProgress) {
+            Object.keys(savedProgress).forEach(item => {
+                document.getElementById(item).checked = savedProgress[item];
+            });
+            displaySavedProgress(savedProgress);
+        }
+    });
+
+    // Save user progress to localStorage per project
+    function saveProgress() {
+        const checklistItems = ["worldBuilding", "characterDevelopment"];
+        const params = new URLSearchParams(window.location.search);
+        const projectId = params.get("projectId");
+
+        if (!projectId) return;
+
+        let progress = {};
+        checklistItems.forEach(item => {
+            progress[item] = document.getElementById(item).checked;
+        });
+
+        localStorage.setItem(`researchProgress_${projectId}`, JSON.stringify(progress));
+        displaySavedProgress(progress);
+        alert("Progress saved successfully!");
+    }
+
+    // Function to display saved progress
+    function displaySavedProgress(progress) {
+        const displayProgress = document.getElementById("displayProgress");
+        displayProgress.textContent = JSON.stringify(progress, null, 2);
+        document.getElementById("savedProgress").style.display = "block";
+    }
+  </script>
+</body>
+</html>
